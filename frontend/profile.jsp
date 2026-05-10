@@ -13,7 +13,7 @@
     com.vehiclerental.service.User loggedInUser =
         (com.vehiclerental.service.User) session.getAttribute("loggedInUser");
     if (loggedInUser == null) {
-        response.sendRedirect("login.html");
+        response.sendRedirect("login.jsp");
         return;
     }
 %>
@@ -22,8 +22,8 @@
     <div class="container">
         <span class="navbar-brand">Vehicle Rental</span>
         <div>
-            <a href="vehicles.html" class="btn btn-outline-light btn-sm me-2">Browse Vehicles</a>
-            <a href="/logout" class="btn btn-light btn-sm">Logout</a>
+            <a href="vehicles.jsp" class="btn btn-outline-light btn-sm me-2">Browse Vehicles</a>
+            <a href="<%= request.getContextPath() %>/logout" class="btn btn-light btn-sm">Logout</a>
         </div>
     </div>
 </nav>
@@ -44,7 +44,7 @@
                         <div class="alert alert-success"><%= success %></div>
                     <% } %>
 
-                    <form action="/updateProfile" method="post">
+                    <form action="<%= request.getContextPath() %>/updateProfile" method="post">
 
                         <div class="mb-3">
                             <label>User ID</label>

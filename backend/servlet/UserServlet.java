@@ -2,7 +2,6 @@ package com.vehiclerental.servlet;
 
 import com.vehiclerental.service.User;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,16 +11,23 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@WebServlet({"/register", "/login", "/updateProfile", "/deleteUser"})
 public class UserServlet extends HttpServlet {
 
-    // Path to users.txt file
-    private static final String FILE_PATH = "data/users.txt";
+    private File getDatabaseFile(String fileName) {
+        String appRoot = getServletContext().getRealPath("/");
+        if (appRoot == null) {
+            return new File("database", fileName);
+        }
+
+        File frontendDir = new File(appRoot);
+        File projectDir = frontendDir.getParentFile();
+        return new File(new File(projectDir, "database"), fileName);
+    }
 
     //READ all users from users.txt
     private List<User> getAllUsers() throws IOException {
         List<User> users = new ArrayList<>();
-        File file = new File(FILE_PATH);
+        File file = getDatabaseFile("users.txt");
         if (!file.exists()) return users;
 
         BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -37,7 +43,13 @@ public class UserServlet extends HttpServlet {
 
     //WRITE all users back to users.txt
     private void saveAllUsers(List<User> users) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, false));
+        File file = getDatabaseFile("users.txt");
+        File parent = file.getParentFile();
+        if (parent != null) {
+            parent.mkdirs();
+        }
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file, false));
         for (User u : users) {
             writer.write(u.toFileString());
             writer.newLine();
@@ -69,7 +81,7 @@ public class UserServlet extends HttpServlet {
                 username == null || username.isEmpty() ||
                 password == null || password.isEmpty()) {
             request.setAttribute("error", "Please fill in all fields");
-            request.getRequestDispatcher("/frontend/register.html").forward(request, response);
+            request.getRequestDispatcher("/register.jsp").forward(request, response);
             return;
         }
 
@@ -79,7 +91,7 @@ public class UserServlet extends HttpServlet {
         for (User u : users) {
             if (u.getUsername().equals(username)) {
                 request.setAttribute("error", "Username already taken");
-                request.getRequestDispatcher("/frontend/register.html").forward(request, response);
+                request.getRequestDispatcher("/register.jsp").forward(request, response);
                 return;
             }
         }
@@ -90,7 +102,7 @@ public class UserServlet extends HttpServlet {
         users.add(newUser);
         saveAllUsers(users);
 
-        response.sendRedirect("/frontend/login.html");
+        response.sendRedirect("login.jsp");
     }
 
     //LOGIN
@@ -109,9 +121,9 @@ public class UserServlet extends HttpServlet {
 
                 // Redirect based on role
                 if (u.getRole().equals("admin")) {
-                    response.sendRedirect("/frontend/admin.jsp");
+                    response.sendRedirect("admin.jsp");
                 } else {
-                    response.sendRedirect("/frontend/vehicles.jsp");
+                    response.sendRedirect("vehicles.jsp");
                 }
                 return;
             }
@@ -119,7 +131,7 @@ public class UserServlet extends HttpServlet {
 
         // No match found
         request.setAttribute("error", "Invalid username or password");
-        request.getRequestDispatcher("/frontend/login.html").forward(request, response);
+        request.getRequestDispatcher("/login.jsp").forward(request, response);
     }
 
     //UPDATE
@@ -127,6 +139,11 @@ public class UserServlet extends HttpServlet {
             throws IOException {
         HttpSession session = request.getSession();
         User loggedInUser = (User) session.getAttribute("loggedInUser");
+
+        if (loggedInUser == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
 
         String newFullName = request.getParameter("fullName");
         String newEmail    = request.getParameter("email");
@@ -145,7 +162,7 @@ public class UserServlet extends HttpServlet {
             }
         }
         saveAllUsers(users);
-        response.sendRedirect("/frontend/profile.jsp");
+        response.sendRedirect("profile.jsp");
     }
 
     //DELETE
@@ -155,7 +172,7 @@ public class UserServlet extends HttpServlet {
         List<User> users = getAllUsers();
         users.removeIf(u -> u.getUserId().equals(userId));
         saveAllUsers(users);
-        response.sendRedirect("/frontend/admin.jsp");
+        response.sendRedirect("admin.jsp");
     }
 
     //Route POST requests
@@ -168,7 +185,23 @@ public class UserServlet extends HttpServlet {
             case "/login":        handleLogin(request, response);    break;
             case "/updateProfile": handleUpdate(request, response);  break;
             case "/deleteUser":   handleDelete(request, response);   break;
-            default: response.sendRedirect("/frontend/login.html");
+            default: response.sendRedirect("login.jsp");
         }
+    }
+
+    //Route GET requests
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        if ("/logout".equals(request.getServletPath())) {
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+            }
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        response.sendRedirect("login.jsp");
     }
 }

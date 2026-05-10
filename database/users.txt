@@ -1,1 +1,2 @@
 U001,admin01,admin123,Admin User,admin@email.com,admin
+U002,IT25101373,Akash@1238,DOLEWATHTHA APPUHAMILAGE AKASH NAVEEN SARANGA PERERA,naveensaranga1212@gmail.com,user

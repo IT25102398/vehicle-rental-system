@@ -5,12 +5,18 @@ import java.io.*;
 
 public class PaymentService {
 
-    private static final String PAYMENT_FILE = "database/payments.txt";
-    private static final String BOOKING_FILE = "database/bookings.txt";
-
     // Save payment
     public static void savePayment(Payment payment) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(PAYMENT_FILE, true));
+        savePayment(payment, new File("database/payments.txt"));
+    }
+
+    public static void savePayment(Payment payment, File paymentFile) throws IOException {
+        File parent = paymentFile.getParentFile();
+        if (parent != null) {
+            parent.mkdirs();
+        }
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(paymentFile, true));
         writer.write(payment.toFileString());
         writer.newLine();
         writer.close();
@@ -18,9 +24,15 @@ public class PaymentService {
 
     // Update booking status to Paid
     public static void updateBookingStatus(String bookingId) throws IOException {
+        updateBookingStatus(bookingId, new File("database/bookings.txt"));
+    }
 
-        File inputFile = new File(BOOKING_FILE);
-        File tempFile = new File("database/temp.txt");
+    public static void updateBookingStatus(String bookingId, File inputFile) throws IOException {
+        File databaseDir = inputFile.getParentFile();
+        if (databaseDir != null) {
+            databaseDir.mkdirs();
+        }
+        File tempFile = new File(databaseDir, "temp.txt");
 
         BufferedReader reader = new BufferedReader(new FileReader(inputFile));
         BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
