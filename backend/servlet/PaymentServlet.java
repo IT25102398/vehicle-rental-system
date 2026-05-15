@@ -2,9 +2,10 @@ package com.vehiclerental.servlet;
 
 import com.vehiclerental.model.Payment;
 import com.vehiclerental.service.PaymentService;
+import com.vehiclerental.service.User;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.*;
+import javax.servlet.ServletException;
+import javax.servlet.http.*;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -24,11 +25,25 @@ public class PaymentServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        if ("/deletePayment".equals(request.getServletPath())) {
+            HttpSession session = request.getSession(false);
+            User loggedInUser = session == null ? null : (User) session.getAttribute("loggedInUser");
+            if (loggedInUser == null || !"admin".equals(loggedInUser.getRole())) {
+                response.sendRedirect("login.jsp");
+                return;
+            }
+            PaymentService.deletePayment(request.getParameter("paymentId"), getDatabaseFile("payments.txt"));
+            response.sendRedirect("admin.jsp");
+            return;
+        }
 
         String bookingId = request.getParameter("bookingId");
         String userId = request.getParameter("userId");
         String amountText = request.getParameter("amount");
         String method = request.getParameter("method");
+        String cardNumber = request.getParameter("cardNumber");
+        String expiry = request.getParameter("expiry");
+        String cvv = request.getParameter("cvv");
 
         if (bookingId == null || bookingId.isEmpty() ||
                 userId == null || userId.isEmpty() ||
@@ -36,6 +51,17 @@ public class PaymentServlet extends HttpServlet {
             request.setAttribute("error", "Please fill in all payment details");
             request.getRequestDispatcher("/payment.jsp").forward(request, response);
             return;
+        }
+
+        if ("card".equals(method)) {
+            String digitsOnly = cardNumber == null ? "" : cardNumber.replaceAll("\\s", "");
+            if (!digitsOnly.matches("\\d{16}") ||
+                    expiry == null || !expiry.matches("(0[1-9]|1[0-2])/\\d{2}") ||
+                    cvv == null || !cvv.matches("\\d{3}")) {
+                request.setAttribute("error", "Please enter valid card details.");
+                request.getRequestDispatcher("/payment.jsp").forward(request, response);
+                return;
+            }
         }
 
         double amount = Double.parseDouble(amountText);

@@ -2,8 +2,42 @@ package com.vehiclerental.service;
 
 import com.vehiclerental.model.Payment;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PaymentService {
+    public static List<Payment> getAllPayments(File paymentFile) throws IOException {
+        List<Payment> payments = new ArrayList<>();
+        if (!paymentFile.exists()) {
+            return payments;
+        }
+
+        BufferedReader reader = new BufferedReader(new FileReader(paymentFile));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (!line.trim().isEmpty()) {
+                Payment payment = Payment.fromFileString(line);
+                if (payment != null) {
+                    payments.add(payment);
+                }
+            }
+        }
+        reader.close();
+        return payments;
+    }
+
+    public static void saveAllPayments(List<Payment> payments, File paymentFile) throws IOException {
+        File parent = paymentFile.getParentFile();
+        if (parent != null) {
+            parent.mkdirs();
+        }
+        BufferedWriter writer = new BufferedWriter(new FileWriter(paymentFile, false));
+        for (Payment payment : payments) {
+            writer.write(payment.toFileString());
+            writer.newLine();
+        }
+        writer.close();
+    }
 
     // Save payment
     public static void savePayment(Payment payment) throws IOException {
@@ -56,5 +90,11 @@ public class PaymentService {
 
         inputFile.delete();
         tempFile.renameTo(inputFile);
+    }
+
+    public static void deletePayment(String paymentId, File paymentFile) throws IOException {
+        List<Payment> payments = getAllPayments(paymentFile);
+        payments.removeIf(payment -> payment.getPaymentId().equals(paymentId));
+        saveAllPayments(payments, paymentFile);
     }
 }

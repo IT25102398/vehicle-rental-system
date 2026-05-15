@@ -1,0 +1,6 @@
+V001,Toyota Prius,Car,Toyota,3500.0,available,2026-05-15
+V002,Suzuki Wagon R,Car,Suzuki,3000.0,available,2026-05-15
+V003,Honda Vezel,SUV,Honda,5500.0,available,2026-05-15
+V004,Honda CB500,Bike,Honda,1500.0,available,2026-05-15
+V005,Honda Fit,Car,Honda,4000.0,available,2026-05-15
+V006,ntroq125,Bike,Honda,2500.0,available,2026-05-15

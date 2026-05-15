@@ -1,11 +1,11 @@
 package com.vehiclerental.servlet;
 
 import com.vehiclerental.service.User;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -168,9 +168,38 @@ public class UserServlet extends HttpServlet {
     //DELETE
     private void handleDelete(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        HttpSession session = request.getSession(false);
+        User loggedInUser = session == null ? null : (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null || !"admin".equals(loggedInUser.getRole())) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
         String userId = request.getParameter("userId");
         List<User> users = getAllUsers();
         users.removeIf(u -> u.getUserId().equals(userId));
+        saveAllUsers(users);
+        response.sendRedirect("admin.jsp");
+    }
+
+    private void handleRoleUpdate(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        HttpSession session = request.getSession(false);
+        User loggedInUser = session == null ? null : (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null || !"admin".equals(loggedInUser.getRole())) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        String userId = request.getParameter("userId");
+        String role = request.getParameter("role");
+        List<User> users = getAllUsers();
+        for (User user : users) {
+            if (user.getUserId().equals(userId)) {
+                user.setRole(role);
+                break;
+            }
+        }
         saveAllUsers(users);
         response.sendRedirect("admin.jsp");
     }
@@ -185,6 +214,7 @@ public class UserServlet extends HttpServlet {
             case "/login":        handleLogin(request, response);    break;
             case "/updateProfile": handleUpdate(request, response);  break;
             case "/deleteUser":   handleDelete(request, response);   break;
+            case "/updateUserRole": handleRoleUpdate(request, response); break;
             default: response.sendRedirect("login.jsp");
         }
     }
