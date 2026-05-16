@@ -1,12 +1,48 @@
-# IntelliJ
+# IntelliJ IDEA / JetBrains
 .idea/
+.idea/workspace.xml
+.idea/**/workspace.xml
 *.iml
 
-# Build output
-out/
-
-# Smart Tomcat
+# Smart Tomcat / local server config
 .smarttomcat/
+
+# Java build output
+out/
+target/
+build/
+bin/
+classes/
+*.class
+*.jar
+*.war
+*.ear
+
+# Runtime logs
+logs/
+*.log
+*.log.*
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
 
 # AI temp
 .ai/
+**/.ai/

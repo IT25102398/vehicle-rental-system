@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<Context docBase="C:\Users\LENOVO\IdeaProjects\vehicle-rental-system\frontend">
-  <Resources cacheMaxSize="10240">
-    <PreResources base="C:/Users/LENOVO/IdeaProjects/vehicle-rental-system/out/production/vehicle-rental-system" className="org.apache.catalina.webresources.DirResourceSet" webAppMount="/WEB-INF/classes"/>
-    <PreResources base="C:/Users/LENOVO/IdeaProjects/vehicle-rental-system/out/production/backend" className="org.apache.catalina.webresources.DirResourceSet" webAppMount="/WEB-INF/classes"/>
-  </Resources>
-</Context>
